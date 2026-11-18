@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "SSJ VPN",
+  "version": "1.0.0",
+  "version_name": "1.0",
+  "description": "Быстрый VPN + AdBlock + SponsorBlock для браузера: заблокированные сайты — через ваш сервер, остальные — напрямую.",
+  "permissions": [
+    "proxy",
+    "storage",
+    "webRequest",
+    "webRequestAuthProvider",
+    "tabs",
+    "alarms",
+    "favicon",
+    "privacy",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ssj_adblock",
+        "enabled": true,
+        "path": "data/adblock_rules.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content/cosmetic.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content/youtube.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/mint/icon16.png",
+      "24": "icons/mint/icon24.png",
+      "32": "icons/mint/icon32.png",
+      "48": "icons/mint/icon48.png",
+      "128": "icons/mint/icon128.png"
+    },
+    "default_title": "SSJ VPN"
+  },
+  "icons": {
+    "16": "icons/mint/icon16.png",
+    "24": "icons/mint/icon24.png",
+    "32": "icons/mint/icon32.png",
+    "48": "icons/mint/icon48.png",
+    "128": "icons/mint/icon128.png"
+  }
+}

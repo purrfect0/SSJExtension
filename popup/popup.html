@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark light">
+  <title>SSJ VPN</title>
+  <script src="theme-init.js"></script>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app" id="appRoot">
+    <header class="app-header" id="appHeader">
+      <img src="../icons/mint/icon32.png" alt="" class="brand-logo" id="brandLogo" width="28" height="28">
+      <div class="ticker" aria-hidden="true">
+        <div class="fx-ticker">
+          <div class="ticker-group">
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+          </div>
+          <div class="ticker-group">
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+            <span class="ticker-item"><b>SSJ</b><em>VPN</em></span><i class="ticker-sep"></i>
+          </div>
+        </div>
+      </div>
+      <span class="visually-hidden">SSJ VPN</span>
+      <nav class="header-actions" aria-label="Разделы">
+        <button class="icon-btn" id="btnOpenServers" type="button" title="Серверы" aria-label="Серверы" data-nav="servers">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="../icons/ui/sprite.svg#server"></use></svg>
+        </button>
+        <button class="icon-btn" id="btnOpenSettings" type="button" title="Настройки" aria-label="Настройки" data-nav="settings">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="../icons/ui/sprite.svg#settings-2"></use></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ===================== Main ===================== -->
+    <main class="view view-main" id="viewMain" data-view="main" aria-labelledby="statusTitle">
+      <section class="hero" id="hero">
+        <button class="power-button" id="btnTogglePower" type="button" aria-pressed="true">
+          <span class="power-ring" aria-hidden="true"></span>
+          <span class="power-arc" aria-hidden="true"></span>
+          <svg class="ui-icon power-icon" viewBox="0 0 24 24" width="52" height="52" aria-hidden="true"><use href="../icons/ui/sprite.svg#power"></use></svg>
+          <span class="visually-hidden" id="powerLabel">Выключить VPN</span>
+        </button>
+        <h1 class="status-title" id="statusTitle" tabindex="-1" aria-live="polite">VPN включён</h1>
+      </section>
+
+      <section class="block dim-when-off" aria-labelledby="serverLabel">
+        <h2 class="block-label" id="serverLabel">Сервер</h2>
+        <div class="server-chips" id="serverChips" role="radiogroup" aria-labelledby="serverLabel"></div>
+      </section>
+
+      <section class="block dim-when-off" aria-labelledby="siteLabel">
+        <h2 class="block-label" id="siteLabel">Этот сайт</h2>
+        <div class="card site-card">
+          <span class="site-icon" aria-hidden="true">
+            <img id="siteFavicon" alt="" width="20" height="20" hidden>
+            <svg id="siteFallback" class="ui-icon" viewBox="0 0 24 24" width="18" height="18"><use href="../icons/ui/sprite.svg#globe"></use></svg>
+          </span>
+          <span class="site-text">
+            <span class="site-host selectable" id="siteHost">…</span>
+            <span class="site-route" id="siteRoute"><span class="dot" aria-hidden="true"></span><span id="siteRouteText">Проверяем…</span></span>
+          </span>
+          <button class="icon-btn icon-btn-sm site-ad-btn" id="btnSiteAdblock" type="button" hidden></button>
+          <button class="btn btn-sm" id="btnSiteAction" type="button" hidden></button>
+        </div>
+      </section>
+
+      <section class="block dim-when-off" aria-labelledby="modeLabel">
+        <h2 class="block-label" id="modeLabel">Через VPN</h2>
+        <div class="segmented" role="group" aria-labelledby="modeLabel">
+          <button class="segment" type="button" data-mode="whitelist" aria-pressed="true">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#shield-check"></use></svg>
+            <span>Только нужные</span>
+          </button>
+          <button class="segment" type="button" data-mode="all" aria-pressed="false">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#globe"></use></svg>
+            <span>Все сайты</span>
+          </button>
+        </div>
+        <button class="row-link" id="btnOpenRules" type="button" data-nav="rules">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#list-filter"></use></svg>
+          <span class="row-link-text">Список сайтов</span>
+          <span class="row-link-meta" id="rulesSummary"></span>
+          <svg class="ui-icon chevron" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#chevron-right"></use></svg>
+        </button>
+      </section>
+    </main>
+
+    <!-- ===================== Rules ===================== -->
+    <section class="view" id="viewRules" data-view="rules" aria-labelledby="rulesTitle" hidden>
+      <div class="view-header">
+        <button class="icon-btn" type="button" data-back aria-label="Назад">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="../icons/ui/sprite.svg#arrow-left"></use></svg>
+        </button>
+        <h1 class="view-title" id="rulesTitle" tabindex="-1">Список сайтов</h1>
+      </div>
+      <div class="view-body">
+        <form class="field-row" id="formAddRule" novalidate>
+          <label class="visually-hidden" for="inputNewRule">Сайт или IP</label>
+          <input type="text" id="inputNewRule" class="input" placeholder="Домен или IP (notion.so)" spellcheck="false" autocomplete="off" aria-describedby="ruleHint ruleError">
+          <button class="btn btn-primary" type="submit" id="btnSubmitRule">Добавить</button>
+        </form>
+        <div class="msg-slot">
+          <p class="hint" id="ruleHint">Поддомены добавляются автоматически. Можно вставить ссылку целиком.</p>
+          <p class="inline-error" id="ruleError" role="alert" hidden></p>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Списки">
+          <button class="tab" type="button" role="tab" id="tabCustom" aria-controls="panelCustom" aria-selected="true">Мой список <span class="count" id="customCount">0</span></button>
+          <button class="tab" type="button" role="tab" id="tabBypass" aria-controls="panelBypass" aria-selected="false" tabindex="-1">Напрямую <span class="count" id="bypassCount">0</span></button>
+          <button class="tab" type="button" role="tab" id="tabBase" aria-controls="panelBase" aria-selected="false" tabindex="-1">База</button>
+        </div>
+
+        <div class="tab-panel" id="panelCustom" role="tabpanel" aria-labelledby="tabCustom">
+          <ul class="list" id="customList"></ul>
+          <div class="empty" id="customEmpty" hidden>
+            <p class="empty-title">Пока пусто</p>
+            <p class="hint">Добавьте сайт выше или кнопкой на главном экране.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="panelBypass" role="tabpanel" aria-labelledby="tabBypass" hidden>
+          <ul class="list" id="bypassList"></ul>
+          <div class="empty" id="bypassEmpty" hidden>
+            <p class="empty-title">Исключений нет</p>
+            <p class="hint">Сайты из этого списка всегда открываются напрямую мимо VPN.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="panelBase" role="tabpanel" aria-labelledby="tabBase" hidden>
+          <div class="card preset-card">
+            <div class="preset-head">
+              <span class="preset-title" id="presetLabel">Zapret на компьютере</span>
+              <div class="segmented segmented-sm" role="group" aria-labelledby="presetLabel">
+                <button class="segment" type="button" data-preset="full" aria-pressed="true">Нет</button>
+                <button class="segment" type="button" data-preset="zapret" aria-pressed="false">Есть</button>
+              </div>
+            </div>
+            <p class="hint" id="presetHint"></p>
+            <p class="stats" id="baseStats"></p>
+          </div>
+          <label class="visually-hidden" for="inputSearchBase">Поиск по базе</label>
+          <div class="input-icon">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#search"></use></svg>
+            <input type="search" id="inputSearchBase" class="input" placeholder="Есть ли сайт в базе?" spellcheck="false" autocomplete="off">
+          </div>
+          <ul class="list" id="baseList"></ul>
+          <p class="hint" id="baseMore" hidden></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Servers ===================== -->
+    <section class="view" id="viewServers" data-view="servers" aria-labelledby="serversTitle" hidden>
+      <div class="view-header">
+        <button class="icon-btn" type="button" data-back aria-label="Назад">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="../icons/ui/sprite.svg#arrow-left"></use></svg>
+        </button>
+        <h1 class="view-title" id="serversTitle" tabindex="-1">Серверы</h1>
+      </div>
+      <div class="view-body">
+        <ul class="list server-list" id="serverList"></ul>
+        <button class="btn btn-secondary btn-block" id="btnAddServer" type="button" data-nav="addServer">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#plus"></use></svg>
+          <span>Добавить сервер</span>
+        </button>
+
+        <div class="card share-card">
+          <h2 class="card-title">Поделиться с другом</h2>
+          <p class="hint">Готовый ZIP с расширением, автоустановщиком и вашими серверами — другу останется только нажать кнопку подключения.</p>
+          <button class="btn btn-primary btn-block" id="btnExportFriend" type="button">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#download"></use></svg>
+            <span id="btnExportFriendText">Скачать ZIP для друга</span>
+          </button>
+          <div class="btn-grid">
+            <button class="btn btn-secondary btn-sm" id="btnCopyKey" type="button" title="Скопировать ключ быстрого обновления сервера">
+              <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#key-round"></use></svg>
+              <span id="btnCopyKeyText">Скопировать ключ</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnPasteKey" type="button" title="Применить ключ ssj1:… из буфера обмена">
+              <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#clipboard-paste"></use></svg>
+              <span>Вставить ключ</span>
+            </button>
+          </div>
+          <p class="hint warn-text">В архиве и ключе лежит доступ к серверу. Отправляйте их только своим.</p>
+          <p class="status-line" id="exportStatus" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Add / edit server ===================== -->
+    <section class="view" id="viewAddServer" data-view="addServer" aria-labelledby="addServerTitle" hidden>
+      <div class="view-header">
+        <button class="icon-btn" type="button" data-back aria-label="Назад">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="../icons/ui/sprite.svg#arrow-left"></use></svg>
+        </button>
+        <h1 class="view-title" id="addServerTitle" tabindex="-1">Новый сервер</h1>
+      </div>
+      <div class="view-body">
+        <div class="segmented segmented-3" role="group" aria-label="Способ добавления" id="addModeSwitch">
+          <button class="segment" type="button" data-add-mode="auto" aria-pressed="true">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#zap"></use></svg>
+            <span>На VPS</span>
+          </button>
+          <button class="segment" type="button" data-add-mode="manual" aria-pressed="false">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#server"></use></svg>
+            <span>Вручную</span>
+          </button>
+          <button class="segment" type="button" data-add-mode="key" aria-pressed="false">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#key-round"></use></svg>
+            <span>По ключу</span>
+          </button>
+        </div>
+
+        <form class="form" id="formKeyAdd" novalidate hidden>
+          <div class="field">
+            <label class="label" for="inputAddKey">Ключ доступа</label>
+            <input type="text" id="inputAddKey" class="input selectable" placeholder="ssj1:…" spellcheck="false" autocomplete="off">
+          </div>
+          <button class="btn btn-primary btn-block" id="btnSubmitAddKey" type="submit">Подключить по ключу</button>
+          <p class="hint">Вставьте ключ вида <code>ssj1:…</code>, который вам прислал друг.</p>
+          <p class="status-line" id="addKeyStatus" role="status" aria-live="polite"></p>
+        </form>
+
+        <form class="form" id="formInstall" novalidate>
+          <div class="field">
+            <label class="label" for="inputInstallIp">IP-адрес VPS</label>
+            <input type="text" id="inputInstallIp" class="input selectable" placeholder="например, 203.0.113.10" spellcheck="false" autocomplete="off" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label class="label" for="inputInstallName">Название <span class="optional">необязательно</span></label>
+            <input type="text" id="inputInstallName" class="input" placeholder="например, VPN Амстердам" maxlength="28" spellcheck="false" autocomplete="off">
+          </div>
+          <button class="btn btn-primary btn-block" id="btnBeginInstall" type="submit">Получить команду</button>
+          <div class="msg-slot">
+            <p class="hint" id="installHint">Нужен VPS на Debian или Ubuntu. Вставьте команду в SSH-консоль под root — дальше всё произойдёт само.</p>
+            <p class="inline-error" id="installError" role="alert" hidden></p>
+          </div>
+        </form>
+
+        <div class="card install-card" id="installCard" hidden>
+          <p class="label">Вставьте в консоль VPS</p>
+          <pre class="code selectable" id="installCmd" tabindex="0" aria-label="Команда установки"></pre>
+          <button class="btn btn-primary btn-block" id="btnCopyCmd" type="button">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="../icons/ui/sprite.svg#copy"></use></svg>
+            <span id="btnCopyCmdText">Скопировать команду</span>
+          </button>
+          <div class="install-status">
+            <span class="dot dot-wait" aria-hidden="true"></span>
+            <span id="installStatusText" role="status" aria-live="polite">Ждём установку…</span>
+            <button class="link-btn" id="btnCancelInstall" type="button">Отменить</button>
+          </div>
+        </div>
+
+        <form class="form" id="formManual" novalidate hidden>
+          <div class="field-grid">
+            <div class="field">
+              <label class="label" for="cfgName">Название</label>
+              <input type="text" id="cfgName" class="input" placeholder="VPN Амстердам" maxlength="28" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="field field-narrow">
+              <label class="label" for="cfgCountry">Флаг</label>
+              <input type="text" id="cfgCountry" class="input" placeholder="авто" maxlength="2" spellcheck="false" autocomplete="off" title="Код страны, например NL">
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label class="label" for="cfgHost">IP-адрес VPS</label>
+              <input type="text" id="cfgHost" class="input selectable" placeholder="например, 203.0.113.10" spellcheck="false" autocomplete="off" inputmode="decimal">
+            </div>
+            <div class="field field-narrow">
+              <label class="label" for="cfgPort">Порт</label>
+              <input type="number" id="cfgPort" class="input" placeholder="8443" min="1" max="65535">
+            </div>
+          </div>
+          <div class="field">
+            <label class="label" for="cfgUsername">Логин прокси</label>
+            <input type="text" id="cfgUsername" class="input" placeholder="ssj" spellcheck="false" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" for="cfgPassword">Пароль прокси</label>
+            <div class="password">
+              <input type="password" id="cfgPassword" class="input" autocomplete="off">
+              <button type="button" class="icon-btn icon-btn-sm" id="btnTogglePw" aria-label="Показать пароль" aria-pressed="false">
+                <svg class="ui-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><use href="../icons/ui/sprite.svg#eye"></use></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="btnSaveServer">Проверить и добавить</button>
+          <p class="status-line" id="saveStatus" role="status" aria-live="polite"></p>
+          <button type="button" class="link-btn" id="btnCopyUninstall" hidden>Скопировать команду удаления прокси с VPS</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================== Settings ===================== -->
+    <section class="view" id="viewSettings" data-view="settings" aria-labelledby="settingsTitle" hidden>
+      <div class="view-header">
+        <button class="icon-btn" type="button" data-back aria-label="Назад">
+          <svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="../icons/ui/sprite.svg#arrow-left"></use></svg>
+        </button>
+        <h1 class="view-title" id="settingsTitle" tabindex="-1">Настройки</h1>
+      </div>
+      <div class="view-body view-body-settings">
+        <div class="card appearance-card">
+          <div class="setting">
+            <span class="label" id="themeLabel">Тема</span>
+            <div class="segmented segmented-sm" role="group" aria-labelledby="themeLabel">
+              <button class="segment" type="button" data-theme-choice="dark" aria-pressed="true">
+                <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#moon"></use></svg><span>Тёмная</span>
+              </button>
+              <button class="segment" type="button" data-theme-choice="light" aria-pressed="false">
+                <svg class="ui-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><use href="../icons/ui/sprite.svg#sun"></use></svg><span>Светлая</span>
+              </button>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="label" id="iconLabel">Значок</span>
+            <div class="icon-themes" id="iconThemes" role="radiogroup" aria-labelledby="iconLabel"></div>
+          </div>
+        </div>
+
+        <div class="card settings-group">
+          <label class="switch-row" for="toggleAdblock">
+            <span class="switch-copy">
+              <span class="switch-title">Блокировка рекламы</span>
+              <span class="hint">Баннеры, промо-блоки, попандеры и трекеры</span>
+            </span>
+            <input type="checkbox" class="switch-input" id="toggleAdblock" checked>
+            <span class="switch-ui" aria-hidden="true"></span>
+          </label>
+
+          <label class="switch-row" for="toggleSponsorBlock">
+            <span class="switch-copy">
+              <span class="switch-title">SponsorBlock для YouTube</span>
+              <span class="hint">Автопропуск рекламных интеграций и прероллов</span>
+            </span>
+            <input type="checkbox" class="switch-input" id="toggleSponsorBlock" checked>
+            <span class="switch-ui" aria-hidden="true"></span>
+          </label>
+
+          <label class="switch-row" for="toggleBypassRu">
+            <span class="switch-copy">
+              <span class="switch-title">Сайты РФ напрямую</span>
+              <span class="hint">Банки, Госуслуги и .ru без VPN в «Все сайты»</span>
+            </span>
+            <input type="checkbox" class="switch-input" id="toggleBypassRu" checked>
+            <span class="switch-ui" aria-hidden="true"></span>
+          </label>
+
+          <label class="switch-row" for="toggleAutoReload">
+            <span class="switch-copy">
+              <span class="switch-title">Автообновление вкладки</span>
+              <span class="hint">Перезагружать сайт после смены правила</span>
+            </span>
+            <input type="checkbox" class="switch-input" id="toggleAutoReload" checked>
+            <span class="switch-ui" aria-hidden="true"></span>
+          </label>
+
+          <label class="switch-row" for="toggleWebrtc">
+            <span class="switch-copy">
+              <span class="switch-title">Защита WebRTC</span>
+              <span class="hint">Скрывать реальный IP в UDP при включённом VPN</span>
+            </span>
+            <input type="checkbox" class="switch-input" id="toggleWebrtc">
+            <span class="switch-ui" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <div class="pin-bottom">
+          <div class="card info-card">
+            <p class="facts-line"><b>HTTP/2 + TLS 1.3 · Kill Switch:</b> работает только в этом браузере, игры и программы идут напрямую.</p>
+          </div>
+          <div class="about-row">
+            <p class="hint" id="aboutText"></p>
+            <button type="button" class="link-btn" id="btnRunSetup">Мастер настройки</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== First-run setup ===================== -->
+    <section class="view" id="viewSetup" data-view="setup" aria-labelledby="setupTitle" hidden>
+      <div class="view-header setup-header">
+        <h1 class="view-title" id="setupTitle" tabindex="-1">Быстрая настройка</h1>
+        <span class="tag" id="setupStepBadge" hidden>Шаг 1 из 3</span>
+      </div>
+      <div class="view-body">
+        <!-- Intro -->
+        <div class="setup-pane setup-intro" id="setupIntro">
+          <div class="setup-badge" aria-hidden="true">
+            <svg class="ui-icon" viewBox="0 0 24 24" width="32" height="32"><use href="../icons/ui/sprite.svg#shield-check"></use></svg>
+          </div>
+          <h2 class="setup-heading">Добро пожаловать в SSJ VPN</h2>
+          <p class="hint setup-lead" id="setupLead">Выберите за 15 секунд удобный режим маршрутизации и блокировки рекламы, или разберётесь сами?</p>
+          <div class="setup-actions-stack">
+            <button class="btn btn-primary btn-block" id="btnStartWizard" type="button">Настроить под себя</button>
+            <button class="btn btn-secondary btn-block" id="btnSkipWizard" type="button">Разберусь сам</button>
+          </div>
+          <p class="hint setup-note">Выбор сохранится на этом компьютере — даже при обновлении файлов расширения проходить настройку заново не придётся.</p>
+        </div>
+
+        <!-- Step 1: Routing & RU sites -->
+        <div class="setup-pane" id="setupStep1" hidden>
+          <p class="label">Какие сайты пускать через VPN?</p>
+          <div class="setup-choices" role="radiogroup" aria-label="Режим маршрутизации">
+            <button type="button" class="choice-card selected" role="radio" aria-checked="true" data-setup-mode="whitelist">
+              <span class="choice-title">Только заблокированные <span class="tag">Рекомендуется</span></span>
+              <span class="hint">YouTube, Discord, Instagram, ChatGPT и сайты из базы РКН. Остальные сайты и игры — напрямую без задержек.</span>
+            </button>
+            <button type="button" class="choice-card" role="radio" aria-checked="false" data-setup-mode="all">
+              <span class="choice-title">Все сайты через VPN</span>
+              <span class="hint">Весь трафик этого браузера идёт через зарубежный сервер.</span>
+            </button>
+          </div>
+
+          <div class="card settings-group">
+            <label class="switch-row" for="setupBypassRu">
+              <span class="switch-copy">
+                <span class="switch-title">Обходить сайты РФ и банки напрямую</span>
+                <span class="hint">Госуслуги, Сбербанк, Т-Банк и .ru без VPN в режиме «Все сайты»</span>
+              </span>
+              <input type="checkbox" class="switch-input" id="setupBypassRu" checked>
+              <span class="switch-ui" aria-hidden="true"></span>
+            </label>
+            <label class="switch-row" for="setupZapret">
+              <span class="switch-copy">
+                <span class="switch-title">У меня на ПК запущен Zapret</span>
+                <span class="hint">Пускать YouTube и Discord напрямую через Zapret</span>
+              </span>
+              <input type="checkbox" class="switch-input" id="setupZapret">
+              <span class="switch-ui" aria-hidden="true"></span>
+            </label>
+          </div>
+
+          <div class="pin-bottom btn-grid">
+            <button type="button" class="btn btn-secondary" id="btnSetupBack1">Назад</button>
+            <button type="button" class="btn btn-primary" id="btnSetupNext1">Далее</button>
+          </div>
+        </div>
+
+        <!-- Step 2: AdBlock & YouTube -->
+        <div class="setup-pane" id="setupStep2" hidden>
+          <p class="label">Блокировка рекламы и YouTube</p>
+          <div class="card settings-group">
+            <label class="switch-row" for="setupAdblock">
+              <span class="switch-copy">
+                <span class="switch-title">Встроенный AdBlock</span>
+                <span class="hint">Убирает баннеры, всплывающие окна, счётчики и промо-блоки в поиске на всех сайтах</span>
+              </span>
+              <input type="checkbox" class="switch-input" id="setupAdblock" checked>
+              <span class="switch-ui" aria-hidden="true"></span>
+            </label>
+            <label class="switch-row" for="setupSponsorBlock">
+              <span class="switch-copy">
+                <span class="switch-title">SponsorBlock для YouTube</span>
+                <span class="hint">Автоматически перематывает рекламные интеграции блогеров и видеорекламу</span>
+              </span>
+              <input type="checkbox" class="switch-input" id="setupSponsorBlock" checked>
+              <span class="switch-ui" aria-hidden="true"></span>
+            </label>
+          </div>
+          <p class="hint">Если на каком-то сайте реклама вдруг понадобится, AdBlock можно отключить для него одной кнопкой щита на главном экране.</p>
+
+          <div class="pin-bottom btn-grid">
+            <button type="button" class="btn btn-secondary" id="btnSetupBack2">Назад</button>
+            <button type="button" class="btn btn-primary" id="btnSetupNext2">Далее</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Comfort, Privacy & Theme -->
+        <div class="setup-pane" id="setupStep3" hidden>
+          <p class="label">Удобство и приватность</p>
+          <div class="card settings-group">
+            <div class="setting">
+              <span class="switch-title" id="setupThemeLabel">Тема оформления</span>
+              <div class="segmented segmented-sm" role="group" aria-labelledby="setupThemeLabel">
+                <button class="segment" type="button" data-setup-theme="dark" aria-pressed="true">Тёмная</button>
+                <button class="segment" type="button" data-setup-theme="light" aria-pressed="false">Светлая</button>
+              </div>
+            </div>
+            <label class="switch-row" for="setupAutoReload">
+              <span class="switch-copy">
+                <span class="switch-title">Автообновление вкладки</span>
+                <span class="hint">Сразу перезагружать открытый сайт после смены его правила</span>
+              </span>
+              <input type="checkbox" class="switch-input" id="setupAutoReload" checked>
+              <span class="switch-ui" aria-hidden="true"></span>
+            </label>
+            <label class="switch-row" for="setupWebrtc">
+              <span class="switch-copy">
+                <span class="switch-title">Защита WebRTC от утечки IP</span>
+                <span class="hint">Блокирует прямой UDP в звонках браузера при активном VPN</span>
+              </span>
+              <input type="checkbox" class="switch-input" id="setupWebrtc">
+              <span class="switch-ui" aria-hidden="true"></span>
+            </label>
+          </div>
+
+          <div class="pin-bottom btn-grid">
+            <button type="button" class="btn btn-secondary" id="btnSetupBack3">Назад</button>
+            <button type="button" class="btn btn-primary" id="btnSetupFinish">Готово</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="toast" id="toast" role="alert" hidden></p>
+
+    <footer class="app-footer">
+      <button class="footer-server" id="footerServer" type="button" title="Проверить подключение">
+        <span class="dot" id="footerDot" aria-hidden="true"></span>
+        <span id="footerServerName">—</span>
+        <span class="footer-ping" id="footerPing"></span>
+      </button>
+      <span class="footer-credits">
+        <span class="footer-by">created by</span>
+        <a href="https://github.com/purrfect0?tab=repositories" target="_blank" rel="noopener noreferrer" class="footer-author" title="GitHub purrfect0"><span class="fx-aurora">purrfect0</span></a>
+        <span class="footer-version" id="footerVersion">v1.0</span>
+      </span>
+    </footer>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Local & private release archives
+releases/
+*.zip
+
+# Chromium unpacked runtime metadata
+_metadata/
+
+# Intermediate rule dumps & local tooling
+data/*.lst
+data/geoblock-dns.json
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

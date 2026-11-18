@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Установка SSJ VPN за 30 секунд</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0f131f; --card: #171d2e; --card-2: #1f273d; --line: rgba(255,255,255,0.1);
+      --text: #f3f6fc; --muted: #9aa5be; --accent: #19d3a2; --accent-bg: rgba(25,211,162,0.14);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f3f6fb; --card: #ffffff; --card-2: #eef2f9; --line: rgba(15,23,42,0.12);
+        --text: #111827; --muted: #4b5563; --accent: #0d9470; --accent-bg: rgba(13,148,112,0.1);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); padding: 36px 20px 60px;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    .hero {
+      background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .badge-icon {
+      width: 54px; height: 54px; border-radius: 14px; background: var(--accent-bg); color: var(--accent);
+      display: grid; place-items: center; font-size: 26px; font-weight: 800; flex-shrink: 0;
+      border: 1px solid rgba(25,211,162,0.35);
+    }
+    h1 { font-size: 22px; line-height: 1.25; margin-bottom: 4px; }
+    .sub { color: var(--muted); font-size: 14.5px; }
+    .step {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .num {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #06281f;
+      font-weight: 800; font-size: 15px; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;
+    }
+    .step-body { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .step-title { font-weight: 700; font-size: 16.5px; }
+    .step-desc { color: var(--muted); font-size: 14.5px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    button.copy-chip {
+      font: 600 13.5px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line);
+      background: var(--card-2); color: var(--text); cursor: pointer; transition: 0.15s;
+    }
+    button.copy-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .kbd {
+      display: inline-block; padding: 2px 7px; border-radius: 6px; background: var(--card-2);
+      border: 1px solid var(--line); font: 600 13px/1.3 ui-monospace, Consolas, monospace;
+    }
+    .done {
+      background: var(--accent-bg); border: 1px solid rgba(25,211,162,0.35); border-radius: 16px;
+      padding: 18px 22px; font-size: 15px;
+    }
+    .done b { color: var(--accent); }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #05291f; font-weight: 700; font-size: 14px;
+      padding: 10px 18px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="badge-icon">⚡</div>
+      <div>
+        <h1>Установка SSJ VPN</h1>
+        <p class="sub">Быстрое подключение за 3 шага в любом Chromium-браузере.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">1</div>
+      <div class="step-body">
+        <div class="step-title">Откройте страницу расширений вашего браузера</div>
+        <div class="step-desc">Нажмите на кнопку вашего браузера ниже (адрес скопируется), вставьте его в адресную строку новой вкладки и нажмите <span class="kbd">Enter</span>:</div>
+        <div class="chips">
+          <button class="copy-chip" data-copy="chrome://extensions/">Chrome: chrome://extensions/</button>
+          <button class="copy-chip" data-copy="edge://extensions/">Edge: edge://extensions/</button>
+          <button class="copy-chip" data-copy="browser://extensions/">Яндекс: browser://extensions/</button>
+          <button class="copy-chip" data-copy="brave://extensions/">Brave: brave://extensions/</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <div class="step-body">
+        <div class="step-title">Включите «Режим разработчика»</div>
+        <div class="step-desc">Переключатель находится на странице расширений <b>в правом верхнем углу</b> (в Edge — слева в меню).</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <div class="step-body">
+        <div class="step-title">Нажмите «Загрузить распакованное расширение»</div>
+        <div class="step-desc" id="folderDesc">Если вы запускали <b>Установить_SSJ_VPN.cmd</b>, путь к папке уже в буфере обмена — просто вставьте его (<span class="kbd">Ctrl + V</span>) в строку выбора папки и нажмите «Выбор папки». Либо выберите распакованную папку <b>SSJ_VPN</b> (внутри неё лежит <code>manifest.json</code>).</div>
+        <div class="chips" id="pathRow" hidden>
+          <button class="copy-chip" id="btnCopyFolder"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="done">
+      <b>Готово!</b> Нажмите на значок пазла <b>🧩</b> в правом верхнем углу браузера, закрепите <b>SSJ VPN</b> булавочкой и откройте расширение: если архив прислал друг — сервер уже встроен, просто нажмите кнопку включения; если это чистая сборка — добавьте свой VPS в 1 команду или вставьте ключ <code>ssj1:…</code>.
+    </div>
+  </div>
+  <div class="toast" id="toast">Скопировано в буфер обмена!</div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    let timer;
+    function copy(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        toast.textContent = 'Скопировано: ' + text;
+        toast.classList.add('show');
+        clearTimeout(timer);
+        timer = setTimeout(() => toast.classList.remove('show'), 2200);
+      });
+    }
+    document.querySelectorAll('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', () => copy(btn.dataset.copy));
+    });
+    // Show exact folder path if opened directly from %LOCALAPPDATA%\SSJ_VPN\installer\guide.html
+    if (location.protocol === 'file:') {
+      const decoded = decodeURIComponent(location.pathname).replace(/^\/([A-Za-z]:)/, '$1');
+      if (/\/installer\/guide\.html$/i.test(decoded)) {
+        const extFolder = decoded.replace(/\/installer\/guide\.html$/i, '').replace(/\//g, '\\');
+        const row = document.getElementById('pathRow');
+        const btn = document.getElementById('btnCopyFolder');
+        row.hidden = false;
+        btn.textContent = 'Скопировать путь к папке: ' + extFolder;
+        btn.addEventListener('click', () => copy(extFolder));
+      }
+    }
+  </script>
+</body>
+</html>
